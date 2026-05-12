@@ -13,7 +13,8 @@ websiteRouter.post("/", async (c) => {
     });
 
     return c.json({
-        id: website.id
+        id: website.id,
+        url: website.url
     })
 });
 
