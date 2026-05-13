@@ -4,7 +4,7 @@ import websiteRouter from "./website";
 
 const router = new Hono();
 
-router.route("/users", userRouter);
+router.route("/user", userRouter);
 router.route("/websites", websiteRouter);
 
 export default router;

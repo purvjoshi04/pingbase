@@ -20,7 +20,7 @@ model Website {
   user_id   String
   timeAdded DateTime
   ticks     WebsiteTick[]
-  user      User          @relation(fields: [user_id], references: [id])
+  user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Region {

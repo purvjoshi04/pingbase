@@ -15,7 +15,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.12.18"
+    "hono": "^4.12.18",
+    "jose": "^6.2.3",
+    "zod": "^4.4.3"
   },
   "exports": {
     ".": "./src/index.ts"
