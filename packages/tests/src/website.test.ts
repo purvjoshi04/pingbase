@@ -3,7 +3,7 @@ import { app } from "@pingbase/api";
 import { setupTestUser, getTestToken } from "./helpers/auth";
 
 describe("Website", () => {
-    let token: string;
+    let token: string, websiteId: string;
 
     beforeAll(async () => {
         await setupTestUser();
@@ -43,5 +43,18 @@ describe("Website", () => {
         expect(res.status).toBe(200);
         const data = await res.json();
         expect(data.id).toBeDefined();
+        websiteId = data.id;
+    });
+
+    it("should fetch website", async () => {
+        const res = await app.request(`/websites/status/${websiteId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        expect(res.status).toBe(200);
+        const data = await res.json();
+        expect(data.website.id).toBe(websiteId);
     });
 });
