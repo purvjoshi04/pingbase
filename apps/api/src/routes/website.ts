@@ -22,8 +22,29 @@ websiteRouter.post("/", async (c) => {
     return c.json({ id: website.id });
 });
 
-websiteRouter.get("/status/:websiteId", (c) => {
-    return c.text("Get websites");
+websiteRouter.get("/status/:websiteId", async (c) => {
+    const userId = c.get("userId");
+    const website = await prisma.website.findFirst({
+        where: {
+            user_id: userId,
+            id: c.req.param('websiteId')
+        },
+        include: {
+            ticks: {
+                orderBy: [{ createdAt: "desc" }],
+                take: 1
+            }
+        }
+    });
+
+    if (!website) {
+        return c.json({ error: "Website not found" }, 404)
+    } else {
+        return c.json({
+            website
+        });
+    }
+
 });
 
 export default websiteRouter;
