@@ -1,0 +1,17 @@
+{
+  "name": "pusher",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --env-file=../../.env ./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@pingbase/store": "workspace:*",
+    "@pingbase/redis-stream": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
