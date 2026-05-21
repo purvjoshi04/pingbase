@@ -1,5 +1,3 @@
-// worker/src/index.ts
-
 import { xAckBulk, xReadGroup } from '@pingbase/redis-stream/client';
 import { processMessage } from './process-message';
 
@@ -11,16 +9,21 @@ if (!WORKER_ID) throw new Error('Worker id not provided');
 
 
 async function main() {
-    const messages = await xReadGroup(REGION_ID, WORKER_ID);
-    if (!messages) return;
+    while (true) {
+        const messages = await xReadGroup(REGION_ID, WORKER_ID);
+        if (!messages) {
+            await Bun.sleep(1000);
+            continue;
+        }
 
-    const allMsgs = messages.flatMap(({ messages: msgs }) => msgs);
+        const allMsgs = messages.flatMap(({ messages: msgs }) => msgs);
 
-    await Promise.all(
-        allMsgs.map(({ message }) => processMessage(message, REGION_ID))
-    );
+        await Promise.all(
+            allMsgs.map(({ message }) => processMessage(message, REGION_ID))
+        );
 
-    await xAckBulk(REGION_ID, allMsgs.map(({ id }) => id));
+        await xAckBulk(REGION_ID, allMsgs.map(({ id }) => id));
+    }
 }
 
 main();
