@@ -32,7 +32,7 @@ websiteRouter.get("/status/:websiteId", async (c) => {
         include: {
             ticks: {
                 orderBy: [{ createdAt: "desc" }],
-                take: 1
+                take: 10
             }
         }
     });
