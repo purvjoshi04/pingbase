@@ -1,33 +1,25 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";                          // ← next/link
-import { Radio, Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Eye, EyeOff, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Card, CardContent, CardDescription,
-    CardFooter, CardHeader, CardTitle,
-} from "@/components/ui/card";
 
 type Mode = "signin" | "signup";
+
 interface AuthFormProps {
     mode: Mode;
 }
+
 export function AuthForm({ mode }: AuthFormProps) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
     const isSignup = mode === "signup";
-    const title = isSignup ? "Create your account" : "Welcome back";
-    const subtitle = isSignup
-        ? "Start monitoring your endpoints in under a minute."
-        : "Sign in to your Pingbase dashboard.";
-    const cta = isSignup ? "Create account" : "Sign in";
+
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (username.trim().length < 3) {
@@ -47,101 +39,119 @@ export function AuthForm({ mode }: AuthFormProps) {
         setLoading(false);
         toast.success(isSignup ? "Account created — welcome to Pingbase!" : "Signed in successfully.");
     };
+
     return (
-        <div className="min-h-screen flex flex-col bg-background">
-            <div className="absolute inset-0 -z-10 bg-(image:--gradient-hero) opacity-60" />
+        <div className="min-h-screen bg-[#0a0f0d] flex flex-col">
             <header className="px-6 h-16 flex items-center">
-                <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                    <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-(image:--gradient-primary) text-primary-foreground">
-                        <Radio className="h-4 w-4" />
+                <Link href="/" className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
+                        <Zap className="h-4 w-4 text-black" fill="black" />
                     </span>
-                    <span className="text-foreground">Pingbase</span>
+                    <span className="text-white font-semibold text-base">Pingbase</span>
                 </Link>
             </header>
-            <main className="flex-1 flex items-center justify-center px-6 py-12">
-                <Card className="w-full max-w-md border-border/60 bg-card/60 backdrop-blur-xl shadow-(--shadow-card)">
-                    <CardHeader className="space-y-2 text-center">
-                        <CardTitle className="text-2xl">{title}</CardTitle>
-                        <CardDescription>{subtitle}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={onSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="username">Username</Label>
-                                <Input
-                                    id="username"
-                                    type="text"
-                                    autoComplete="username"
-                                    placeholder="yourhandle"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+            <main className="flex-1 flex items-center justify-center px-4">
+                <div className="w-full max-w-sm bg-[#111915] border border-white/10 rounded-2xl p-8">
+                    <div className="text-center mb-8">
+                        <h1 className="text-white text-2xl font-bold mb-1">
+                            {isSignup ? "Create your account" : "Welcome back"}
+                        </h1>
+                        <p className="text-gray-400 text-sm">
+                            {isSignup
+                                ? "Start monitoring your endpoints in under a minute."
+                                : "Sign in to your Pingbase dashboard"}
+                        </p>
+                    </div>
+                    <form onSubmit={onSubmit} className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-white text-sm font-medium" htmlFor="username">
+                                Username
+                            </label>
+                            <input
+                                id="username"
+                                type="text"
+                                autoComplete="username"
+                                placeholder="yourhandle"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                className="w-full bg-[#0d1510] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 transition"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-white text-sm font-medium" htmlFor="password">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    autoComplete={isSignup ? "new-password" : "current-password"}
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     required
+                                    className="w-full bg-[#0d1510] border border-white/10 rounded-xl px-4 py-3 pr-11 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 transition"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((s) => !s)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
+                        </div>
+                        {isSignup && (
+                            <div className="space-y-2">
+                                <label className="text-white text-sm font-medium" htmlFor="confirm">
+                                    Confirm password
+                                </label>
+                                <input
+                                    id="confirm"
+                                    type={showPassword ? "text" : "password"}
+                                    autoComplete="new-password"
+                                    placeholder="••••••••"
+                                    value={confirm}
+                                    onChange={(e) => setConfirm(e.target.value)}
+                                    required
+                                    className="w-full bg-[#0d1510] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/30 transition"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="password"
-                                        type={showPassword ? "text" : "password"}
-                                        autoComplete={isSignup ? "new-password" : "current-password"}
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="pr-10"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword((s) => !s)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
-                                    >
-                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                </div>
-                            </div>
-                            {isSignup && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirm">Confirm password</Label>
-                                    <Input
-                                        id="confirm"
-                                        type={showPassword ? "text" : "password"}
-                                        autoComplete="new-password"
-                                        placeholder="••••••••"
-                                        value={confirm}
-                                        onChange={(e) => setConfirm(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-emerald-400 hover:bg-emerald-300 disabled:opacity-60 text-black font-semibold rounded-xl py-3 text-sm transition flex items-center justify-center mt-2"
+                        >
+                            {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : isSignup ? (
+                                "Create account"
+                            ) : (
+                                "Sign in"
                             )}
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full rounded-lg bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90 transition"
-                            >
-                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : cta}
-                            </Button>
-                        </form>
-                    </CardContent>
-                    <CardFooter className="justify-center text-sm text-muted-foreground">
+                        </button>
+                    </form>
+                    <p className="text-center text-sm text-gray-500 mt-6">
                         {isSignup ? (
-                            <span>
+                            <>
                                 Already have an account?{" "}
-                                <Link href="/signin" className="text-foreground hover:text-primary transition font-medium">
+                                <Link href="/signin" className="text-emerald-400 hover:text-emerald-300 font-medium transition">
                                     Sign in
                                 </Link>
-                            </span>
+                            </>
                         ) : (
-                            <span>
+                            <>
                                 New to Pingbase?{" "}
-                                <Link href="/signup" className="text-foreground hover:text-primary transition font-medium">
+                                <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 font-medium transition">
                                     Create an account
                                 </Link>
-                            </span>
+                            </>
                         )}
-                    </CardFooter>
-                </Card>
+                    </p>
+                </div>
             </main>
         </div>
     );
