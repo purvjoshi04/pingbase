@@ -11,7 +11,7 @@ describe("Website", () => {
     });
 
     it("should not create website without auth", async () => {
-        const res = await app.request("/websites", {
+        const res = await app.request("/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: "https://google.com" }),
@@ -20,7 +20,7 @@ describe("Website", () => {
     });
 
     it("should not create website if url is missing", async () => {
-        const res = await app.request("/websites", {
+        const res = await app.request("/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -32,7 +32,7 @@ describe("Website", () => {
     });
 
     it("should create website", async () => {
-        const res = await app.request("/websites", {
+        const res = await app.request("/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -47,7 +47,7 @@ describe("Website", () => {
     });
 
     it("should fetch website", async () => {
-        const res = await app.request(`/websites/status/${websiteId}`, {
+        const res = await app.request(`/status/${websiteId}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -56,5 +56,26 @@ describe("Website", () => {
         expect(res.status).toBe(200);
         const data = await res.json();
         expect(data.website.id).toBe(websiteId);
+    });
+
+    it("should be able to get all websites", async () => {
+        const res = await app.request("/websites", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.headers.get("Content-Type")).toContain("application/json");
+
+        const data = await res.json();
+
+        expect(data).toHaveProperty("websites");
+        expect(Array.isArray(data.websites)).toBe(true);
+        expect(data.websites.length).toBeGreaterThan(0);
+        expect(
+            data.websites.some((w: any) => w.id === websiteId)
+        ).toBe(true);
     });
 });

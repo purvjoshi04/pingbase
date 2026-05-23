@@ -1,30 +1,30 @@
-import { Geist, Geist_Mono } from "next/font/google"
-
+import type { Metadata } from "next";
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { Providers } from "./providers";
+import { Toaster } from "sonner";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
+export const metadata: Metadata = {
+  title: "Pingbase — Uptime monitoring & status pages for modern teams",
+  description: "Monitor uptime, ship beautiful status pages, and get instant incident alerts. Pingbase is the developer-first observability platform.",
+  authors: [{ name: "Pingbase" }],
+  openGraph: {
+    title: "Pingbase — Uptime monitoring built for builders",
+    description: "Monitor every endpoint, ship beautiful status pages, and resolve incidents before users notice.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    site: "@Pingbase",
+  },
+};
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
-    >
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
+        <Toaster theme="dark" richColors position="top-center" />
       </body>
     </html>
-  )
+  );
 }

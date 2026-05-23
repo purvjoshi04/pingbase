@@ -44,7 +44,16 @@ websiteRouter.get("/status/:websiteId", async (c) => {
             website
         });
     }
+});
 
+websiteRouter.get("/websites", async (c) => {
+    const userId = c.get("userId");
+    const websites = await prisma.website.findMany({
+        where: {
+            user_id: userId
+        }
+    });
+    return c.json({ websites }, 200);
 });
 
 export default websiteRouter;
