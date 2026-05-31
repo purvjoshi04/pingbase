@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Radio, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
 
 type Mode = "signin" | "signup";
 
@@ -16,12 +18,12 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
+    const router = useRouter();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const isSignup = mode === "signup";
     const title = isSignup ? "Create your account" : "Welcome back";
     const subtitle = isSignup
@@ -31,6 +33,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         if (username.trim().length < 3) {
             toast.error("Username must be at least 3 characters.");
             return;
@@ -43,10 +46,29 @@ export function AuthForm({ mode }: AuthFormProps) {
             toast.error("Passwords do not match.");
             return;
         }
+
         setLoading(true);
-        await new Promise((r) => setTimeout(r, 700));
-        setLoading(false);
-        toast.success(isSignup ? "Account created — welcome to Pingbase!" : "Signed in successfully.");
+
+        try {
+            const res = isSignup
+                ? await api.user.signup(username.trim(), password)
+                : await api.user.signin(username.trim(), password);
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                toast.error(data.error ?? "Something went wrong. Please try again.");
+                return;
+            }
+            localStorage.setItem("token", data.token);
+
+            toast.success(isSignup ? "Account created — welcome to Pingbase!" : "Signed in successfully.");
+            router.push("/dashboard");
+        } catch {
+            toast.error("Could not reach the server. Check your connection.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

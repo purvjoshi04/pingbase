@@ -46,7 +46,7 @@ websiteRouter.get("/status/:websiteId", async (c) => {
     }
 });
 
-websiteRouter.get("/websites", async (c) => {
+websiteRouter.get("/", async (c) => {
     const userId = c.get("userId");
     const websites = await prisma.website.findMany({
         where: {
