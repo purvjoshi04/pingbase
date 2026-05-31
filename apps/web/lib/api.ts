@@ -39,7 +39,7 @@ export const api = {
                 body: JSON.stringify({ url }),
             }),
         getAll: () =>
-            apiFetch("/websites/websites"),
+            apiFetch("/websites"),
         getStatus: (websiteId: string) =>
             apiFetch(`/websites/status/${websiteId}`),
     },

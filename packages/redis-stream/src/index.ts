@@ -5,6 +5,8 @@ const client = createClient()
 
 await client.connect();
 
+const STREAM_NAME = Bun.env.STREAM_NAME!;
+const GROUP_NAME = Bun.env.REGION_ID!;
 type WebsiteEvent = { url: string; id: string };
 
 type StreamMessage = {
@@ -16,6 +18,31 @@ type StreamMessage = {
 }
 
 export type { StreamMessage };
+
+
+async function ensureGroup() {
+    try {
+        await client.xGroupCreate(STREAM_NAME, GROUP_NAME, "0", {
+            MKSTREAM: true,
+        });
+    } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("BUSYGROUP")) return;
+        throw err;
+    }
+}
+
+await ensureGroup();
+
+export async function ensureConsumerGroup(groupName: string) {
+    try {
+        await client.xGroupCreate(Bun.env.STREAM_NAME!, groupName, "0", {
+            MKSTREAM: true,
+        });
+    } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("BUSYGROUP")) return;
+        throw err;
+    }
+}
 
 async function xAdd({ url, id }: WebsiteEvent) {
     await client.xAdd(

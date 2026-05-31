@@ -51,6 +51,12 @@ websiteRouter.get("/", async (c) => {
     const websites = await prisma.website.findMany({
         where: {
             user_id: userId
+        },
+        include: {
+            ticks: {
+                orderBy: [{ createdAt: "desc" }],
+                take: 50
+            }
         }
     });
     return c.json({ websites }, 200);
