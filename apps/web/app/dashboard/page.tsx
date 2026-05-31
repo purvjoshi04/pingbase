@@ -32,6 +32,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { computeStats } from "@/lib/uptime";
@@ -176,6 +183,21 @@ export default function DashboardPage() {
             toast.error("Could not reach the server.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (siteId: string) => {
+        try {
+            const res = await api.websites.delete(siteId);
+            if (!res.ok) {
+                const data = await res.json();
+                toast.error(data.error ?? "Failed to delete monitor.");
+                return;
+            }
+            setSites((prev) => prev.filter((s) => s.id !== siteId));
+            toast.success("Website removed.");
+        } catch {
+            toast.error("Could not reach the server.");
         }
     };
 
@@ -353,9 +375,22 @@ export default function DashboardPage() {
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">{site.lastChecked}</TableCell>
                                         <TableCell>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        className="text-destructive focus:text-destructive cursor-pointer"
+                                                        onClick={() => handleDelete(site.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
                                 ))

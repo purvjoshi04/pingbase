@@ -46,6 +46,25 @@ websiteRouter.get("/status/:websiteId", async (c) => {
     }
 });
 
+websiteRouter.delete("/:websiteId", async (c) => {
+    const userId = c.get("userId");
+    const websiteId = c.req.param("websiteId");
+
+    const website = await prisma.website.findFirst({
+        where: {
+            id: websiteId,
+            user_id: userId
+        }
+    });
+
+    if (!website) {
+        return c.json({ error: "Website not found" }, 404);
+    }
+
+    await prisma.website.delete({ where: { id: websiteId } });
+    return c.json({ success: true });
+})
+
 websiteRouter.get("/", async (c) => {
     const userId = c.get("userId");
     const websites = await prisma.website.findMany({
@@ -61,5 +80,6 @@ websiteRouter.get("/", async (c) => {
     });
     return c.json({ websites }, 200);
 });
+
 
 export default websiteRouter;

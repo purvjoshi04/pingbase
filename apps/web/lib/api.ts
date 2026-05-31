@@ -42,5 +42,7 @@ export const api = {
             apiFetch("/websites"),
         getStatus: (websiteId: string) =>
             apiFetch(`/websites/status/${websiteId}`),
+        delete: (websiteId: string) =>
+            apiFetch(`/websites/${websiteId}`, { method: "DELETE" }),
     },
 };
