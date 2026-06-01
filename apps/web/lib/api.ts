@@ -42,6 +42,11 @@ export const api = {
             apiFetch("/websites"),
         getStatus: (websiteId: string) =>
             apiFetch(`/websites/status/${websiteId}`),
+        update: (websiteId: string, url: string, name: string) =>
+            apiFetch(`/websites/${websiteId}`, {
+                method: "PATCH",
+                body: JSON.stringify({ url, name }),
+            }),
         delete: (websiteId: string) =>
             apiFetch(`/websites/${websiteId}`, { method: "DELETE" }),
     },

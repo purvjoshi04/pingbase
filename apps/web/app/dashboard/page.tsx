@@ -38,7 +38,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Trash2 } from "lucide-react";
+import { Trash2, SquarePen } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { computeStats } from "@/lib/uptime";
@@ -64,7 +64,7 @@ type Tick = {
 type WebsiteFromApi = {
     id: string;
     url: string;
-    name: string,
+    name: string;
     ticks: Tick[];
 };
 
@@ -108,6 +108,8 @@ function StatusBadge({ status }: { status: Status }) {
 
 export default function DashboardPage() {
     const [sites, setSites] = useState<Site[]>([]);
+
+    // Add modal state
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
     const [url, setUrl] = useState("");
@@ -115,43 +117,49 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
 
+    // Edit modal state
+    const [editOpen, setEditOpen] = useState(false);
+    const [editingSite, setEditingSite] = useState<Site | null>(null);
+    const [editName, setEditName] = useState("");
+    const [editUrl, setEditUrl] = useState("");
+    const [editLoading, setEditLoading] = useState(false);
+
     const upCount = sites.filter((s) => s.status === "up").length;
     const downCount = sites.filter((s) => s.status === "down").length;
     const degradedCount = sites.filter((s) => s.status === "degraded").length;
 
-useEffect(() => {
-    const fetchSites = async () => {
-        try {
-            const res = await api.websites.getAll();
-            const data = await res.json();
-            if (res.ok) {
-                setSites(
-                    data.websites.map((w: WebsiteFromApi) => {
-                        const { uptime, responseMs, lastChecked } = computeStats(w.ticks);
-                        return {
-                            id: w.id,
-                            name: w.name,
-                            url: w.url,
-                            status: tickStatusToStatus(w.ticks),
-                            uptime,
-                            responseMs,
-                            lastChecked,
-                        };
-                    })
-                );
+    useEffect(() => {
+        const fetchSites = async () => {
+            try {
+                const res = await api.websites.getAll();
+                const data = await res.json();
+                if (res.ok) {
+                    setSites(
+                        data.websites.map((w: WebsiteFromApi) => {
+                            const { uptime, responseMs, lastChecked } = computeStats(w.ticks);
+                            return {
+                                id: w.id,
+                                name: w.name,
+                                url: w.url,
+                                status: tickStatusToStatus(w.ticks),
+                                uptime,
+                                responseMs,
+                                lastChecked,
+                            };
+                        })
+                    );
+                }
+            } catch {
+                
+            } finally {
+                setFetching(false);
             }
-        } catch {
-            
-        } finally {
-            setFetching(false);
-        }
-    };
+        };
 
-    fetchSites();
-
-    const intervalId = window.setInterval(fetchSites, 30 * 1000);
-    return () => window.clearInterval(intervalId);
-}, []);
+        fetchSites();
+        const intervalId = window.setInterval(fetchSites, 30 * 1000);
+        return () => window.clearInterval(intervalId);
+    }, []);
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -163,7 +171,6 @@ useEffect(() => {
         try {
             const res = await api.websites.create(url.trim(), name.trim());
             const data = await res.json();
-
             if (!res.ok) {
                 toast.error(data.error ?? "Failed to add monitor.");
                 return;
@@ -190,6 +197,45 @@ useEffect(() => {
         }
     };
 
+    const openEdit = (site: Site) => {
+        setEditingSite(site);
+        setEditName(site.name);
+        setEditUrl(site.url);
+        setEditOpen(true);
+    };
+
+    const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!editingSite) return;
+        if (!editName.trim() || !editUrl.trim()) {
+            toast.error("Name and URL are required");
+            return;
+        }
+        setEditLoading(true);
+        try {
+            const res = await api.websites.update(editingSite.id, editUrl.trim(), editName.trim());
+            const data = await res.json();
+            if (!res.ok) {
+                toast.error(data.error ?? "Failed to update monitor.");
+                return;
+            }
+            setSites((prev) =>
+                prev.map((s) =>
+                    s.id === editingSite.id
+                        ? { ...s, name: editName.trim(), url: editUrl.trim() }
+                        : s
+                )
+            );
+            setEditOpen(false);
+            setEditingSite(null);
+            toast.success("Monitor updated.");
+        } catch {
+            toast.error("Could not reach the server.");
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
     const handleDelete = async (siteId: string) => {
         try {
             const res = await api.websites.delete(siteId);
@@ -199,7 +245,7 @@ useEffect(() => {
                 return;
             }
             setSites((prev) => prev.filter((s) => s.id !== siteId));
-            toast.success("Website removed.");
+            toast.success("Monitor removed.");
         } catch {
             toast.error("Could not reach the server.");
         }
@@ -220,15 +266,15 @@ useEffect(() => {
                         </span>
                         <span>Pingbase</span>
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+                    {/* <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
                         <Link href="/dashboard" className="text-foreground">Monitors</Link>
                         <a className="hover:text-foreground" href="#">Incidents</a>
                         <a className="hover:text-foreground" href="#">Status pages</a>
                         <a className="hover:text-foreground" href="#">Settings</a>
-                    </nav>
-                    <div className="flex items-center gap-3">
+                    </nav> */}
+                    {/* <div className="flex items-center gap-3">
                         <span className="hidden sm:inline text-xs text-muted-foreground">acme@team</span>
-                    </div>
+                    </div> */}
                 </div>
             </header>
 
@@ -241,7 +287,10 @@ useEffect(() => {
                         </p>
                     </div>
 
-                    <Dialog open={open} onOpenChange={setOpen}>
+                    <Dialog open={open} onOpenChange={(v) => {
+                        setOpen(v);
+                        if (!v) { setName(""); setUrl(""); setInterval("1"); }
+                    }}>
                         <DialogTrigger asChild>
                             <Button className="bg-linear-to-r from-primary to-primary-glow shadow-lg shadow-primary/20">
                                 <Plus className="h-4 w-4" />
@@ -307,6 +356,55 @@ useEffect(() => {
                         </DialogContent>
                     </Dialog>
                 </div>
+
+                <Dialog open={editOpen} onOpenChange={(v) => {
+                    setEditOpen(v);
+                    if (!v) setEditingSite(null);
+                }}>
+                    <DialogContent className="bg-card/90 backdrop-blur-2xl border-white/10">
+                        <DialogHeader>
+                            <DialogTitle>Edit monitor</DialogTitle>
+                            <DialogDescription>
+                                Update the display name or URL for this monitor.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleEdit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-name">Display name</Label>
+                                <Input
+                                    id="edit-name"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    placeholder="Marketing site"
+                                    className="bg-white/3 border-white/10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-url">URL</Label>
+                                <Input
+                                    id="edit-url"
+                                    type="url"
+                                    value={editUrl}
+                                    onChange={(e) => setEditUrl(e.target.value)}
+                                    placeholder="https://example.com"
+                                    className="bg-white/3 border-white/10"
+                                />
+                            </div>
+                            <DialogFooter className="pt-2">
+                                <Button type="button" variant="ghost" onClick={() => setEditOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={editLoading}
+                                    className="bg-linear-to-r from-primary to-primary-glow"
+                                >
+                                    {editLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="grid gap-4 sm:grid-cols-3 mb-8">
                     <Card className="bg-card/60 backdrop-blur-xl border-white/10">
@@ -386,6 +484,13 @@ useEffect(() => {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={() => openEdit(site)}
+                                                    >
+                                                        <SquarePen className="h-4 w-4 mr-2" />
+                                                        Edit
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         className="text-destructive focus:text-destructive cursor-pointer"
                                                         onClick={() => handleDelete(site.id)}

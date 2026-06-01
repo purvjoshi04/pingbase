@@ -11,32 +11,31 @@ import {
   CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function Nav() {
-  const router = useRouter();
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-(image:--gradient-primary) text-primary-foreground">
             <Radio className="h-4 w-4" />
             <span className="absolute inset-0 rounded-md animate-ping bg-primary/30" />
           </span>
           <span className="text-foreground">Pingbase</span>
-        </a>
+        </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition">Features</a>
-          <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
-          <a href="#status" className="hover:text-foreground transition">Status pages</a>
-          <a href="#docs" className="hover:text-foreground transition">Docs</a>
+          <Link href="#features" className="hover:text-foreground transition">Features</Link>
+          <Link href="#status" className="hover:text-foreground transition">Status pages</Link>
         </nav>
         <div className="flex items-center gap-3 text-sm">
-          <Button variant="ghost" size="sm" onClick={() => {router.push("/signin")}}>
-            Sign in
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/signin">Sign in</Link>
           </Button>
-          <Button onClick={() => {router.push("/signup")}} size="sm" className="rounded-lg bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90 transition">
+          <Button size="sm" className="rounded-lg bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90 transition" asChild>
+            <Link href="/signup">
               Start free <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </Button>
         </div>
       </div>
@@ -68,12 +67,12 @@ function Hero() {
         </p>
         <div className="mt-9 flex items-center justify-center gap-3">
           <Button className="rounded-lg bg-(image:--gradient-primary) px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition h-auto" style={{ boxShadow: "var(--shadow-glow)" }} asChild>
-            <a href="#">
+            <Link href="/signup">
               Start monitoring free <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
           <Button variant="outline" className="rounded-lg px-5 py-3 text-sm font-medium h-auto" asChild>
-            <a href="#">View live demo</a>
+            <Link href="/">View live demo</Link>
           </Button>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">No credit card · 30-second setup · 10 monitors free forever</p>
@@ -254,67 +253,7 @@ function StatusShowcase() {
   );
 }
 
-function Pricing() {
-  const tiers = [
-    { name: "Hobby", price: "$0", desc: "For side projects and personal sites.", features: ["10 monitors", "3-min checks", "1 status page", "Email alerts"], cta: "Start free", featured: false },
-    { name: "Team", price: "$29", desc: "For startups shipping fast.", features: ["100 monitors", "30-sec checks", "Unlimited status pages", "Slack, SMS, on-call", "30-day log retention"], cta: "Start 14-day trial", featured: true },
-    { name: "Business", price: "$129", desc: "For teams with strict SLAs.", features: ["Unlimited monitors", "15-sec checks", "Audit logs & SSO", "Phone-call alerts", "3-year log retention"], cta: "Contact sales", featured: false },
-  ] as const;
 
-  return (
-    <section id="pricing" className="mx-auto max-w-7xl px-6 py-28">
-      <div className="text-center max-w-2xl mx-auto">
-        <p className="text-sm font-medium text-primary">Pricing</p>
-        <h2 className="mt-3 text-4xl md:text-5xl font-semibold tracking-tight text-foreground">Simple, predictable, generous.</h2>
-        <p className="mt-4 text-lg text-muted-foreground">No per-seat fees. No surprise overages. Cancel any time.</p>
-      </div>
-      <div className="mt-14 grid md:grid-cols-3 gap-6">
-        {tiers.map((t) => (
-          <Card
-            key={t.name}
-            className={`relative rounded-2xl p-0 overflow-hidden ${t.featured ? "border-primary/60 bg-card" : "border-border bg-card/60"}`}
-            style={t.featured ? { boxShadow: "var(--shadow-glow)" } : undefined}
-          >
-            {t.featured && (
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-(image:--gradient-primary) px-3 py-0.5 text-xs font-medium text-primary-foreground border-0 hover:opacity-90">
-                Most popular
-              </Badge>
-            )}
-            <CardHeader className="p-8 pb-0">
-              <CardTitle className="text-lg">{t.name}</CardTitle>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-semibold text-foreground">{t.price}</span>
-                <span className="text-sm text-muted-foreground">/month</span>
-              </div>
-              <CardDescription className="mt-2 text-sm">{t.desc}</CardDescription>
-            </CardHeader>
-            <CardContent className="p-8 pt-6">
-              <Button
-                className={`w-full rounded-lg px-4 py-2.5 text-sm font-medium transition h-auto ${
-                  t.featured
-                    ? "bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90"
-                    : "border border-border text-foreground hover:bg-accent"
-                }`}
-                variant={t.featured ? "default" : "outline"}
-                asChild
-              >
-                <a href="#">{t.cta}</a>
-              </Button>
-              <ul className="mt-7 space-y-3">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function CTA() {
   return (
@@ -328,9 +267,9 @@ function CTA() {
           Set up your first monitor in 30 seconds. Free forever for up to 10 endpoints.
         </CardDescription>
         <Button className="relative mt-8 inline-flex items-center gap-2 rounded-lg bg-(image:--gradient-primary) px-6 py-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition h-auto" style={{ boxShadow: "var(--shadow-glow)" }} asChild>
-          <a href="#">
+          <Link href="/signup">
             Start monitoring free <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </Button>
       </Card>
     </section>
@@ -338,6 +277,8 @@ function CTA() {
 }
 
 function Footer() {
+  const date = new Date();
+  const year = date.getFullYear();
   return (
     <footer>
       <Separator />
@@ -347,7 +288,7 @@ function Footer() {
             <Radio className="h-3.5 w-3.5" />
           </span>
           <span className="text-foreground font-semibold">Pingbase</span>
-          <span>· © 2026</span>
+          <span>· © {year}</span>
         </div>
         <div className="flex gap-6">
           <a href="#" className="hover:text-foreground transition">Privacy</a>
@@ -368,7 +309,6 @@ export default function Page() {
       <Logos />
       <Features />
       <StatusShowcase />
-      <Pricing />
       <CTA />
       <Footer />
     </main>

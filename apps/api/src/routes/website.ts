@@ -53,6 +53,37 @@ websiteRouter.get("/status/:websiteId", async (c) => {
     }
 });
 
+websiteRouter.patch("/:websiteId", async (c) => {
+    const userId = c.get("userId");
+    const websiteId = c.req.param("websiteId");
+    const body = await c.req.json();
+
+    const website = await prisma.website.findFirst({
+        where: {
+            id: websiteId,
+            user_id: userId
+        }
+    });
+
+    if (!website) {
+        return c.json({
+            error: "Website not found"
+        }, 404);
+    }
+
+    const updated = await prisma.website.update({
+        where: {
+            id: websiteId
+        },
+        data: {
+            ...(body.name && { name: body.name }),
+            ...(body.url && { url: body.url })
+        }
+    });
+
+    return c.json({ id: updated.id });
+});
+
 websiteRouter.delete("/:websiteId", async (c) => {
     const userId = c.get("userId");
     const websiteId = c.req.param("websiteId");
@@ -70,7 +101,7 @@ websiteRouter.delete("/:websiteId", async (c) => {
 
     await prisma.website.delete({ where: { id: websiteId } });
     return c.json({ success: true });
-})
+});
 
 websiteRouter.get("/", async (c) => {
     const userId = c.get("userId");
