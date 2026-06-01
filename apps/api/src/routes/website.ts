@@ -15,8 +15,15 @@ websiteRouter.post("/", async (c) => {
         return c.json({ error: "url is required" }, 400);
     }
 
+    if (!body.name) return c.json({ error: "name is required" }, 400);
+
     const website = await prisma.website.create({
-        data: { url: body.url, timeAdded: new Date(), user_id: userId }
+        data: {
+            name: body.name,
+            url: body.url,
+            timeAdded: new Date(),
+            user_id: userId
+        }
     });
 
     return c.json({ id: website.id });

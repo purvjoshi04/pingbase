@@ -64,6 +64,7 @@ type Tick = {
 type WebsiteFromApi = {
     id: string;
     url: string;
+    name: string,
     ticks: Tick[];
 };
 
@@ -118,36 +119,39 @@ export default function DashboardPage() {
     const downCount = sites.filter((s) => s.status === "down").length;
     const degradedCount = sites.filter((s) => s.status === "degraded").length;
 
-    useEffect(() => {
-        const fetchSites = async () => {
-            try {
-                const res = await api.websites.getAll();
-                const data = await res.json();
-                if (res.ok) {
-                    setSites(
-                        data.websites.map((w: WebsiteFromApi) => {
-                            const { uptime, responseMs, lastChecked } = computeStats(w.ticks);
-                            return {
-                                id: w.id,
-                                name: w.url,
-                                url: w.url,
-                                status: tickStatusToStatus(w.ticks),
-                                uptime,
-                                responseMs,
-                                lastChecked,
-                            };
-                        })
-                    );
-                }
-            } catch {
-                toast.error("Failed to load monitors.");
-            } finally {
-                setFetching(false);
+useEffect(() => {
+    const fetchSites = async () => {
+        try {
+            const res = await api.websites.getAll();
+            const data = await res.json();
+            if (res.ok) {
+                setSites(
+                    data.websites.map((w: WebsiteFromApi) => {
+                        const { uptime, responseMs, lastChecked } = computeStats(w.ticks);
+                        return {
+                            id: w.id,
+                            name: w.name,
+                            url: w.url,
+                            status: tickStatusToStatus(w.ticks),
+                            uptime,
+                            responseMs,
+                            lastChecked,
+                        };
+                    })
+                );
             }
-        };
+        } catch {
+            
+        } finally {
+            setFetching(false);
+        }
+    };
 
-        fetchSites();
-    }, []);
+    fetchSites();
+
+    const intervalId = window.setInterval(fetchSites, 30 * 1000);
+    return () => window.clearInterval(intervalId);
+}, []);
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -157,7 +161,7 @@ export default function DashboardPage() {
         }
         setLoading(true);
         try {
-            const res = await api.websites.create(url.trim());
+            const res = await api.websites.create(url.trim(), name.trim());
             const data = await res.json();
 
             if (!res.ok) {

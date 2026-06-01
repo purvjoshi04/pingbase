@@ -33,10 +33,10 @@ export const api = {
             }),
     },
     websites: {
-        create: (url: string) =>
+        create: (url: string, name: string) =>
             apiFetch("/websites", {
                 method: "POST",
-                body: JSON.stringify({ url }),
+                body: JSON.stringify({ url, name }),
             }),
         getAll: () =>
             apiFetch("/websites"),

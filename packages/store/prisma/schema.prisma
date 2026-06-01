@@ -16,6 +16,7 @@ model User {
 
 model Website {
   id        String        @id @default(uuid())
+  name      String
   url       String
   user_id   String
   timeAdded DateTime
