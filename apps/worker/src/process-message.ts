@@ -1,6 +1,5 @@
 import { prisma } from '@pingbase/store';
 
-// process-message.ts
 export async function processMessage(
     message: Record<string, string>,
     regionId: string

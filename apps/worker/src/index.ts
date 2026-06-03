@@ -1,4 +1,3 @@
-// apps/worker/src/index.ts
 import { xAckBulk, xReadGroup, ensureConsumerGroup } from "@pingbase/redis-stream/client";
 import { processMessage } from "./process-message";
 
