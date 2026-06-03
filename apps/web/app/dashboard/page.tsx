@@ -85,13 +85,13 @@ export default function DashboardPage() {
                         </span>
                         <span>Pingbase</span>
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+                    {/* <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
                         <Link href="/dashboard" className="text-foreground">Monitors</Link>
                         <a className="hover:text-foreground" href="#">Incidents</a>
                         <a className="hover:text-foreground" href="#">Status pages</a>
                         <a className="hover:text-foreground" href="#">Settings</a>
-                    </nav>
-                    <span className="hidden sm:inline text-xs text-muted-foreground">acme@team</span>
+                    </nav> */}
+                    {/* <span className="hidden sm:inline text-xs text-muted-foreground">acme@team</span> */}
                 </div>
             </header>
             <main className="relative mx-auto max-w-7xl px-6 py-10">
