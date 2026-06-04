@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css"
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
+import { PageLoader } from "@/components/page-loader";
 
 export const metadata: Metadata = {
   title: "Pingbase — Uptime monitoring & status pages for modern teams",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <PageLoader />
         <Providers>{children}</Providers>
         <Toaster theme="dark" richColors position="top-center" />
       </body>

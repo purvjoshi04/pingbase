@@ -134,12 +134,6 @@ export default function WebsiteDetail() {
                         </span>
                         <span>Pingbase</span>
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                        <Link href="/dashboard" className="hover:text-foreground">Monitors</Link>
-                        <a className="hover:text-foreground" href="#">Incidents</a>
-                        <a className="hover:text-foreground" href="#">Status pages</a>
-                        <a className="hover:text-foreground" href="#">Settings</a>
-                    </nav>
                 </div>
             </header>
 
