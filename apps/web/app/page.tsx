@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Activity, Bell, Globe2, ShieldCheck, Zap, BarChart3,
   ArrowRight, Check, Server, Radio,
@@ -13,7 +14,33 @@ import {
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
+import { api } from "@/lib/api";
+import { UserMenu } from "@/components/ui/UserMenu";
+
 function Nav() {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("token");
+  });
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    async function verify() {
+      try {
+        const res = await api.user.me();
+        if (!res.ok) {
+          localStorage.removeItem("token");
+          setIsLoggedIn(false);
+        }
+      } catch {
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+      }
+    }
+    verify();
+  }, [isLoggedIn]);
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -28,16 +55,26 @@ function Nav() {
           <Link href="#features" className="hover:text-foreground transition">Features</Link>
           <Link href="#status" className="hover:text-foreground transition">Status pages</Link>
         </nav>
-        <div className="flex items-center gap-3 text-sm">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/signin">Sign in</Link>
-          </Button>
-          <Button size="sm" className="rounded-lg bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90 transition" asChild>
-            <Link href="/signup">
-              Start free <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </Button>
-        </div>
+
+        {isLoggedIn ? (
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+            <UserMenu />
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-sm">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/signin">Sign in</Link>
+            </Button>
+            <Button size="sm" className="rounded-lg bg-(image:--gradient-primary) text-primary-foreground hover:opacity-90 transition" asChild>
+              <Link href="/signup">
+                Start free <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );
@@ -252,8 +289,6 @@ function StatusShowcase() {
     </section>
   );
 }
-
-
 
 function CTA() {
   return (

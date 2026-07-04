@@ -31,6 +31,20 @@ export const api = {
                 method: "POST",
                 body: JSON.stringify({ username, password }),
             }),
+        me: () => apiFetch("/user/me"),
+            updateProfile: (username: string) =>
+                apiFetch("/user/me", {
+                    method: "PATCH",
+                    body: JSON.stringify({ username }),
+                }),
+            changePassword: (currentPassword: string, newPassword: string) =>
+                apiFetch("/user/change-password", {
+                    method: "POST",
+                    body: JSON.stringify({ currentPassword, newPassword }),
+                }),
+            logout: () => {
+                localStorage.removeItem("token");
+            },
     },
     websites: {
         create: (url: string, name: string, checkInterval: number) =>

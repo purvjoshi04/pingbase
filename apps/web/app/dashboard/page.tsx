@@ -13,6 +13,7 @@ import { AddMonitorDialog } from "@/components/ui/AddMonitorDialog";
 import { EditMonitorDialog } from "@/components/ui/EditMonitorDialog";
 import { MonitorsTable } from "@/components/ui/MonitorsTable";
 import { SummaryCards } from "@/components/ui/SummaryCards";
+import { UserMenu } from "@/components/ui/UserMenu";
 
 export default function DashboardPage() {
     const [sites, setSites] = useState<Site[]>([]);
@@ -92,6 +93,7 @@ export default function DashboardPage() {
                         <a className="hover:text-foreground" href="#">Settings</a>
                     </nav> */}
                     {/* <span className="hidden sm:inline text-xs text-muted-foreground">acme@team</span> */}
+                    <UserMenu />
                 </div>
             </header>
             <main className="relative mx-auto max-w-7xl px-6 py-10">
