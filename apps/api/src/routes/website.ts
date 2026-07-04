@@ -7,22 +7,30 @@ const websiteRouter = new Hono<AppContext>();
 
 websiteRouter.use(authMiddleware);
 
+const VALID_INTERVALS = [60, 180, 300, 600];
+
 websiteRouter.post("/", async (c) => {
-    const body = await c.req.json();
+    const { name, url, checkInterval } = await c.req.json();
     const userId = c.get("userId");
 
-    if (!body.url) {
+    if (!url) {
         return c.json({ error: "url is required" }, 400);
     }
 
-    if (!body.name) return c.json({ error: "name is required" }, 400);
+    if (!name) return c.json({ error: "name is required" }, 400);
+
+    if (!VALID_INTERVALS.includes(checkInterval)) {
+        return c.json({ error: 'Invalid check interval' }, 400);
+    }
 
     const website = await prisma.website.create({
         data: {
-            name: body.name,
-            url: body.url,
+            name,
+            url,
+            user_id: userId,
             timeAdded: new Date(),
-            user_id: userId
+            checkInterval,
+            nextCheckAt: new Date()
         }
     });
 
@@ -66,18 +74,22 @@ websiteRouter.patch("/:websiteId", async (c) => {
     });
 
     if (!website) {
-        return c.json({
-            error: "Website not found"
-        }, 404);
+        return c.json({ error: "Website not found" }, 404);
+    }
+
+    if (body.checkInterval !== undefined && !VALID_INTERVALS.includes(body.checkInterval)) {
+        return c.json({ error: "Invalid check interval" }, 400);
     }
 
     const updated = await prisma.website.update({
-        where: {
-            id: websiteId
-        },
+        where: { id: websiteId },
         data: {
             ...(body.name && { name: body.name }),
-            ...(body.url && { url: body.url })
+            ...(body.url && { url: body.url }),
+            ...(body.checkInterval !== undefined && {
+                checkInterval: body.checkInterval,
+                nextCheckAt: new Date(),
+            }),
         }
     });
 

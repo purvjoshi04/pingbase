@@ -41,7 +41,9 @@ export function AddMonitorDialog({ open, onOpenChange, onAdded }: Props) {
 
         setLoading(true);
         try {
-            const res = await api.websites.create(url.trim(), name.trim());
+            const checkIntervalSeconds = Number(interval) * 60;
+
+            const res = await api.websites.create(url.trim(), name.trim(), checkIntervalSeconds);
             const data = await res.json();
 
             if (!res.ok) {
@@ -67,7 +69,6 @@ export function AddMonitorDialog({ open, onOpenChange, onAdded }: Props) {
             setLoading(false);
         }
     }
-
     return (
         <Dialog open={open} onOpenChange={handleClose}>
             <DialogTrigger asChild>

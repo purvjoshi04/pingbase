@@ -15,18 +15,23 @@ model User {
 }
 
 model Website {
-  id        String        @id @default(uuid())
-  name      String
-  url       String
-  user_id   String
-  timeAdded DateTime
-  ticks     WebsiteTick[]
-  user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id            String        @id @default(uuid())
+  name          String
+  url           String
+  user_id       String
+  timeAdded     DateTime
+  checkInterval Int           @default(60)
+  lastCheckedAt DateTime?
+  nextCheckAt   DateTime      @default(now())
+  ticks         WebsiteTick[]
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([nextCheckAt])
 }
 
 model Region {
   id    String        @id @default(uuid())
-  name  String
+  name  String        @unique
   ticks WebsiteTick[]
 }
 
