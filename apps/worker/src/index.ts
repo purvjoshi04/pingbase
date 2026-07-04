@@ -1,17 +1,17 @@
 import { xAckBulk, xReadGroup, ensureConsumerGroup } from "@pingbase/redis-stream/client";
 import { processMessage } from "./process-message";
+import { ensureRegion } from '@pingbase/store';
 
-const REGION_ID = Bun.env.REGION_ID!;
+const region = await ensureRegion(process.env.REGION_NAME ?? 'default');
 const WORKER_ID = Bun.env.WORKER_ID!;
 
-if (!REGION_ID) throw new Error("Region id not provided");
 if (!WORKER_ID) throw new Error("Worker id not provided");
 
-await ensureConsumerGroup(REGION_ID);
+await ensureConsumerGroup(region.id);
 
 async function main() {
     while (true) {
-        const messages = await xReadGroup(REGION_ID, WORKER_ID);
+        const messages = await xReadGroup(region.id, WORKER_ID);
         if (!messages) {
             await Bun.sleep(1000);
             continue;
@@ -20,10 +20,10 @@ async function main() {
         const allMsgs = messages.flatMap(({ messages: msgs }) => msgs);
 
         await Promise.all(
-            allMsgs.map(({ message }) => processMessage(message, REGION_ID))
+            allMsgs.map(({ message }) => processMessage(message, region.id))
         );
 
-        await xAckBulk(REGION_ID, allMsgs.map(({ id }) => id));
+        await xAckBulk(region.id, allMsgs.map(({ id }) => id));
     }
 }
 
