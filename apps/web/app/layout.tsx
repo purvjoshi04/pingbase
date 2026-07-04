@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import { PageLoader } from "@/components/page-loader";
 
 export const metadata: Metadata = {
-  title: "Pingbase — Uptime monitoring & status pages for modern teams",
+  title: "Pingbase",
   description: "Monitor uptime, ship beautiful status pages, and get instant incident alerts. Pingbase is the developer-first observability platform.",
   authors: [{ name: "Pingbase" }],
   openGraph: {
