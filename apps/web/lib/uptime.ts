@@ -7,14 +7,18 @@ type Tick = {
 export function computeStats(ticks: Tick[]) {
     if (!ticks.length) return { uptime: "—", responseMs: 0, lastChecked: "—" };
 
-    const upTicks = ticks.filter((t) => t.status === "Up").length;
-    const uptime = ((upTicks / ticks.length) * 100).toFixed(2) + "%";
-
-    const avgResponse = Math.round(
-        ticks.reduce((sum, t) => sum + t.response_time_ms, 0) / ticks.length
+    const sorted = [...ticks].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    const lastChecked = formatRelative(new Date(ticks[0].createdAt));
+    const upTicks = sorted.filter((t) => t.status === "Up");
+    const uptime = ((upTicks.length / sorted.length) * 100).toFixed(2) + "%";
+
+    const avgResponse = upTicks.length
+        ? Math.round(upTicks.reduce((sum, t) => sum + t.response_time_ms, 0) / upTicks.length)
+        : 0;
+
+    const lastChecked = formatRelative(new Date(sorted[0].createdAt));
 
     return { uptime, responseMs: avgResponse, lastChecked };
 }
