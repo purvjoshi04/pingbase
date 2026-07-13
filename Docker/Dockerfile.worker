@@ -1,0 +1,24 @@
+FROM oven/bun:1 AS base
+
+FROM base AS pruner
+WORKDIR /app
+RUN bun install -g turbo
+COPY . .
+RUN turbo prune @pingbase/worker --docker
+
+FROM base AS install
+WORKDIR /app
+COPY --from=pruner /app/out/json/ .
+RUN bun install --frozen-lockfile
+
+FROM base AS release
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=install /app ./
+COPY --from=pruner /app/out/full/ .
+RUN bunx prisma generate --schema=packages/store/prisma/schema.prisma
+
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT ["bun", "run", "apps/worker/src/index.ts"]

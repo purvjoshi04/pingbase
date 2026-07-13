@@ -1,0 +1,30 @@
+FROM oven/bun:1 AS base
+
+FROM base AS pruner
+WORKDIR /app
+RUN bun install -g turbo
+COPY . .
+RUN turbo prune @pingbase/api --docker
+
+FROM base AS install
+WORKDIR /app
+COPY --from=pruner /app/out/json/ .
+RUN bun install --frozen-lockfile
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=install /app ./
+COPY --from=pruner /app/out/full/ .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN bun run turbo build --filter=@pingbase/api
+
+FROM base AS release
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app ./
+COPY --from=pruner /app/out/full/ .
+
+USER bun
+EXPOSE 3001/tcp
+ENTRYPOINT ["bun", "run", "apps/api/src/index.ts"]

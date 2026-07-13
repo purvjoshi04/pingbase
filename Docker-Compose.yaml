@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pingbase-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pingbase
+      POSTGRES_PASSWORD: pingbase
+      POSTGRES_DB: pingbase
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pingbase" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pingbase-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: pingbase-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pingbase-net
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: pingbase-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    env_file:
+      - .env
+    networks:
+      - pingbase-net
+
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    working_dir: /app/packages/store
+    entrypoint: [ "bunx", "prisma", "migrate", "deploy" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - pingbase-net
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: pingbase-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - pingbase-net
+
+  pusher:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.pusher
+    container_name: pingbase-pusher
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - pingbase-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: pingbase-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "3002:3000"
+    networks:
+      - pingbase-net
+
+networks:
+  pingbase-net:
+    driver: bridge
+
+volumes:
+  pgdata:
