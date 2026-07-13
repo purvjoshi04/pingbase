@@ -15,7 +15,7 @@ app.route("/api", router);
 
 if (process.env.NODE_ENV !== "test") {
     Bun.serve({
-        port: Number(Bun.env.PORT) || 3001,
+        port: Number(Bun.env.API_PORT) || 3001,
         fetch: app.fetch,
     });
     console.log(`Started server on port ${Bun.env.PORT || 3001}`);
